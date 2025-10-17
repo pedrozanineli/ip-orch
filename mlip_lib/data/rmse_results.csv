@@ -1,0 +1,2 @@
+uip_name,model_name,rmse_bulk_per_atom (eV),rmse_surface_total_per_atom (eV),rmse_surface_energy (J/mˆ2)
+mace,MACE-MP-0,44.1182,44.3717,533.0224
