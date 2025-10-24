@@ -10,6 +10,9 @@ CONDA_ACTIVATE = "/opt/miniconda3/bin/activate"
 # Ambiente base no qual os processos serão chamados
 BASE_ENV = "menu"
 
+#Benchmarks list
+BENCHMARKS = ["surfaces", "eos"]
+
 # Caminho para os modelos pré-treinados
 MODELS_PATH = "/temp/"
 # Para referência, o caminho original era:

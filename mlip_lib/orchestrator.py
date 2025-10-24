@@ -1,7 +1,5 @@
 import subprocess
 import sys
-# Remova a importação do yaml
-# import yaml 
 
 # Importe seu novo arquivo de configuração
 import config
@@ -42,31 +40,36 @@ def main():
     """
     base_env = config.BASE_ENV
     full_models = config.FULL_MODELS
+    benchmarks = config.BENCHMARKS
 
-    if not base_env or not full_models:
-        print("❌ ERRO: 'BASE_ENV' e/ou 'FULL_MODELS' não estão definidos corretamente em 'config.py'.", file=sys.stderr)
+    if not all ([base_env, full_models, benchmarks]):
+        print("ERROR: Verify 'BASE_ENV', 'FULL_MODELS' or 'BENCHMARKS' not setted at 'config.py'.", file=sys.stderr)
         sys.exit(1)
 
-    # Loop simplificado: itera diretamente sobre os itens do dicionário
-    for calculator_name, model_name in full_models.items():
-        if model_name is None:
-            print(f"⏭️  Pulando calculadora '{calculator_name}' pois não há modelo definido.")
-            continue
+    for benchmark_name in benchmarks:
+        print(f"\n{'='*60}")
+        print(f" Benchmark initialized: {benchmark_name.upper()}")
+        print(f"\n{'='*60}")
+
+        for calculator_name, model_name in full_models.items():
+            if model_name is None:
+                print(f" Pulando calculadora '{calculator_name}' pois não há modelo definido.")
+                continue
+                
+            print(f"\n{'='*50}")
+            print(f" Processando calculadora: {calculator_name.upper()} (Modelo: {model_name})")
+            print(f"{'='*50}\n")
             
-        print(f"\n{'='*50}")
-        print(f" Processando calculadora: {calculator_name.upper()} (Modelo: {model_name})")
-        print(f"{'='*50}\n")
-        
-        # Etapa 1: Preparação - Passa o nome da calculadora e do modelo
-        run_script_in_env(base_env, '1_prepare.py', calculator_name, model_name)
-        
-        # Etapa 2: Inferência - O ambiente é o nome da calculadora. Passa a calculadora e o modelo.
-        run_script_in_env(calculator_name, '2_inference.py', calculator_name, model_name)
-        
-        # Etapa 3: Plots - Passa o nome da calculadora e do modelo
-        run_script_in_env(base_env, '3_plots.py', calculator_name, model_name)
-        
-        print(f"--- Pipeline para a calculadora {calculator_name} finalizado. ---\n")
+            # Etapa 1: Preparação - Passa o nome da calculadora e do modelo
+            run_script_in_env(base_env, '1_prepare.py', benchmark_name, calculator_name, model_name)
+            
+            # Etapa 2: Inferência - O ambiente é o nome da calculadora. Passa a calculadora e o modelo.
+            run_script_in_env(calculator_name, '2_inference.py', benchmark_name, calculator_name, model_name)
+            
+            # Etapa 3: Plots - Passa o nome da calculadora e do modelo
+            run_script_in_env(base_env, '3_plots.py', benchmark_name, calculator_name, model_name)
+            
+            print(f"--- Pipeline para a calculadora {calculator_name} @ {benchmark_name}  finalizado. ---\n")
 
 if __name__ == "__main__":
     main()
