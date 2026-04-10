@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ip-orch"
+version = "0.0.1"
+authors = [
+  { name="Mauri Perira dos Santos Júnior", email="mauri.junior@lnls.br" },
+  { name="Pedro Henrique Machado Zanineli", email="pedro.zanineli@lnnano.cnpem.br" },
+]
+description = "Uma biblioteca para MLIPs e benchmarks."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text="MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "rich",  
+    "numpy",  
+    "pandas",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[project.scripts]
+ip-orch = "ip_orch.cli.main:main"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7",
+  "pytest-mock>=3.10",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
