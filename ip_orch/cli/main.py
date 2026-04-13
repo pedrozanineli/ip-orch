@@ -33,6 +33,59 @@ def _get_aliases():
 
 console = Console()
 
+# Map family tokens to repository URLs
+MODEL_FAMILY_REPOS = {
+    "chgnet": "https://github.com/CederGroupHub/chgnet",
+    "deepmd": "https://github.com/deepmodeling/deepmd-kit",
+    "eqnorm": "https://github.com/yzchen08/eqnorm",
+    "grace": "https://github.com/ICAMS/grace-tensorpotential",
+    "hienet": "https://github.com/divelab/AIRS/tree/main/OpenMat/HIENet",
+    "m3gnet": "https://github.com/materialyzeai/m3gnet",
+    "mace": "https://github.com/ACEsuit/mace",
+    "matris": "https://github.com/HPC-AI-Team/MatRIS",
+    "mattersim": "https://github.com/microsoft/mattersim",
+    "nequip": "https://github.com/mir-group/nequip",
+    "nequix": "https://github.com/atomicarchitects/nequix",
+    "orb": "https://github.com/orbital-materials/orb-models",
+    "sevenn": "https://github.com/MDIL-SNU/SevenNet",
+    "tace": "https://github.com/xvzemin/tace",
+    "upet": "https://github.com/lab-cosmo/upet",
+}
+
+def _repo_url_for_alias(alias: str) -> str:
+    a = (alias or "").lower()
+    if "chgnet" in a:
+        return MODEL_FAMILY_REPOS["chgnet"]
+    if a.startswith("dpa") or "deepmd" in a:
+        return MODEL_FAMILY_REPOS["deepmd"]
+    if "eqnorm" in a:
+        return MODEL_FAMILY_REPOS["eqnorm"]
+    if "grace" in a:
+        return MODEL_FAMILY_REPOS["grace"]
+    if "hienet" in a:
+        return MODEL_FAMILY_REPOS["hienet"]
+    if "m3gnet" in a:
+        return MODEL_FAMILY_REPOS["m3gnet"]
+    if a.startswith("mace"):
+        return MODEL_FAMILY_REPOS["mace"]
+    if "matris" in a:
+        return MODEL_FAMILY_REPOS["matris"]
+    if "mattersim" in a:
+        return MODEL_FAMILY_REPOS["mattersim"]
+    if "nequip" in a or "allegro" in a:
+        return MODEL_FAMILY_REPOS["nequip"]
+    if "nequix" in a:
+        return MODEL_FAMILY_REPOS["nequix"]
+    if a.startswith("orb"):
+        return MODEL_FAMILY_REPOS["orb"]
+    if "sevennet" in a or "sevenn" in a:
+        return MODEL_FAMILY_REPOS["sevenn"]
+    if "tace" in a:
+        return MODEL_FAMILY_REPOS["tace"]
+    if "upet" in a or a.startswith("pet"):
+        return MODEL_FAMILY_REPOS["upet"]
+    return "-"
+
 # Known calculator env names and default model suggestions
 DEFAULT_MODELS_BY_ENV = {
     "fair-chem": "FAIRChem",
@@ -201,12 +254,7 @@ def cmd_show(args: argparse.Namespace) -> int:
 
 
 def cmd_models(args: argparse.Namespace) -> int:
-    """List supported model aliases with optional filter and configured flag.
-
-    Displays whether each alias is currently configured (present in your pairs):
-    - ✓ if alias appears in your config
-    - × otherwise
-    """
+    """List supported model aliases with optional filter, repo and configured flag."""
     aliases = _get_aliases()
     cfg = load_config()
     pairs = _dedup_pairs(cfg.get("full_models", []))
@@ -216,14 +264,16 @@ def cmd_models(args: argparse.Namespace) -> int:
 
     if args.contains:
         sub = args.contains.lower()
-        rows = [r for r in rows if sub in r[0].lower() or sub in (r[1] or "").lower()]
+        rows = [r for r in rows if sub in r[0].lower() or sub in (r[1] or "").lower() or sub in _repo_url_for_alias(r[0]).lower()]
     table = Table(box=box.SIMPLE_HEAVY, header_style="bold cyan")
     table.add_column("alias", style="cyan")
     table.add_column("registry", style="magenta")
+    table.add_column("repo", style="blue")
     table.add_column("configured", style="green")
     for alias, target in rows:
-        mark = "✓" if alias in configured_aliases else "×"
-        table.add_row(alias, target, mark)
+        url = _repo_url_for_alias(alias)
+        configured_mark = "✓" if alias in configured_aliases else "×"
+        table.add_row(alias, target, url, configured_mark)
     console.print(table)
     return 0
 
@@ -394,13 +444,10 @@ def cmd_run(args: argparse.Namespace) -> int:
 def main(argv: List[str] = None) -> int:
     epilog = (
         "Commands (use one):\n"
-        "  --add               ENV MODEL\n"
-        "  --remove            ENV [MODEL]\n"
-        "  --show\n"
-        "  --run               SCRIPT [--only env1,env2]\n"
-        "  --models            [SUBSTR]  (alias: --supported-models)\n"
-        "  --supported-models  [SUBSTR]  (alias of --models)\n"
-        "  --packages\n"
+        "  --add                ENV MODEL\n"
+        "  --remove             ENV [MODEL]\n"
+        "  --run                SCRIPT [--only env1,env2]\n"
+        "  --available-models   [SUBSTR]\n"
         "  --configure\n"
     )
     parser = argparse.ArgumentParser(
@@ -412,11 +459,8 @@ def main(argv: List[str] = None) -> int:
     grp = parser.add_mutually_exclusive_group(required=True)
     grp.add_argument("--add", nargs=2, metavar=("ENV", "MODEL"), help="Add (env, model) pair")
     grp.add_argument("--remove", nargs="+", metavar=("ENV", "MODEL"), help="Remove by env or a specific pair")
-    grp.add_argument("--show", action="store_true", help="Show current configuration")
     grp.add_argument("--run", metavar="SCRIPT", help="Run your ASE script across models")
-    grp.add_argument("--models", nargs="?", const="", metavar="SUBSTR", help="List supported model aliases (optional filter)")
-    grp.add_argument("--supported-models", nargs="?", dest="models_alias", const="", metavar="SUBSTR", help="Alias for --models")
-    grp.add_argument("--packages", action="store_true", help="List package tokens and their variants")
+    grp.add_argument("--available-models", nargs="?", dest="available_models", const="", metavar="SUBSTR", help="List available model aliases (optional filter)")
     grp.add_argument("--configure", action="store_true", help="Interactive discovery and setup")
 
     parser.add_argument("--models-path", dest="models_path", default=None, help="Models path (reserved)")
@@ -437,18 +481,13 @@ def main(argv: List[str] = None) -> int:
                 return 1
             a = argparse.Namespace(env=env, model=model)
             return cmd_remove(a)
-        if args.show:
-            return cmd_show(argparse.Namespace())
         if args.run:
             a = argparse.Namespace(script=args.run, only=args.only)
             return cmd_run(a)
-        # handle models via either flag
-        if (args.models is not None) or (getattr(args, "models_alias", None) is not None):
-            contains = args.models if args.models is not None else args.models_alias
-            a = argparse.Namespace(contains=contains or None)
+        # available models list
+        if getattr(args, "available_models", None) is not None:
+            a = argparse.Namespace(contains=(args.available_models or None))
             return cmd_models(a)
-        if args.packages:
-            return cmd_packages(argparse.Namespace())
         if args.configure:
             return cmd_configure(argparse.Namespace())
         parser.print_help()
