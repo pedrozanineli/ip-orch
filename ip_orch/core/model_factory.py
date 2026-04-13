@@ -206,6 +206,12 @@ class ModelFactory:
             from mace.calculators import mace_mp
             return mace_mp(model="large", device=device)
 
+        # MACE MP (default)
+        if key == "mace_mp":
+            from mace.calculators import mace_mp
+            # Choose a sensible default size
+            return mace_mp(model="medium", device=device)
+
         # ORB V2
         if key == "orb_v2":
             from orb_models.forcefield import pretrained
