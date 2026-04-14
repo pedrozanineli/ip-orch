@@ -165,20 +165,29 @@ def cmd_run(args: argparse.Namespace) -> int:
     pairs = _dedup_pairs(cfg.get("full_models", []))
     models_path = cfg.get("models_path", "")
     envs_base_dir = cfg.get("envs_base_dir", "")
-    if args.only:
-        only = {_clean_env(x.strip()) for x in args.only.split(",") if x.strip()}
-        pairs = [p for p in pairs if _clean_env(p[0]) in only]
+    # Selection: either --envs or --models must be provided by caller
+    selected_pairs = []
+    if getattr(args, "envs", None):
+        envs_sel = {_clean_env(x.strip()) for x in args.envs.split(",") if x.strip()}
+        selected_pairs = [p for p in pairs if _clean_env(p[0]) in envs_sel]
+    elif getattr(args, "models", None):
+        models_sel = { _canonical_alias(x.strip()) for x in args.models.split(",") if x.strip() }
+        selected_pairs = [p for p in pairs if _canonical_alias(p[1]) in models_sel]
+    else:
+        console.print("[red]For --run, provide either --envs or --models.")
+        return 2
 
-    if not pairs:
-        console.print("[red]No models configured. Use 'ip-orch add <env> <model>'.")
+    if not selected_pairs:
+        console.print("[red]No matching (env, model) pairs found for the selection.")
+        console.print("Use 'ip-orch --configure' or 'ip-orch --add ENV MODEL' to set them.")
         return 1
 
-    summary_lines = [f"{_clean_env(e)} → {m}" for e, m in pairs]
+    summary_lines = [f"{_clean_env(e)} → {m}" for e, m in selected_pairs]
     summary = "\n".join(summary_lines) if summary_lines else "(no models)"
     console.print(Panel(f"IPORCH Orchestrator: starting execution\n{summary}", border_style="blue"))
 
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
-    for env_name, model_name in pairs:
+    for env_name, model_name in selected_pairs:
         worker_path = _generate_worker()
         try:
             python_bin = _python_for_env(env_name, envs_base_dir)
