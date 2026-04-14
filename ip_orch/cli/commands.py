@@ -3,6 +3,7 @@ import tempfile
 import subprocess
 import argparse
 import inspect
+import re
 
 from typing import List
 
@@ -266,9 +267,22 @@ def _interactive_edit_pairs(pairs: List[List[str]]):
             if not pairs:
                 console.print("No entries to remove.")
                 continue
-            idx = int(Prompt.ask("Index to remove", default="1")) - 1
-            if 0 <= idx < len(pairs):
-                pairs.pop(idx)
+            raw = Prompt.ask("Index(es) to remove (e.g. 1 3,5)", default="1")
+            tokens = [t for t in re.split(r"[\s,]+", (raw or "").strip()) if t]
+            try:
+                idxs = sorted({int(t) - 1 for t in tokens}, reverse=True)
+            except ValueError:
+                console.print("[red]Invalid indices.[/red]")
+                continue
+            removed = 0
+            for idx in idxs:
+                if 0 <= idx < len(pairs):
+                    pairs.pop(idx)
+                    removed += 1
+            if removed == 0:
+                console.print("No valid indices removed.")
+            else:
+                console.print(f"Removed {removed} entr{'y' if removed == 1 else 'ies'}.")
 
 
 def cmd_configure(args: argparse.Namespace) -> int:
