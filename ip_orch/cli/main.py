@@ -82,6 +82,55 @@ def main(argv: List[str] = None) -> int:
         help="Select specific model aliases to run (across configured environments)",
     )
 
+    # Optional post-processing: linear energy correction
+    parser.add_argument(
+        "--energy-linear-config",
+        dest="energy_linear_config",
+        default=None,
+        metavar="JSON",
+        help="JSON file with linear energy correction parameters (keys: a, b, mode)",
+    )
+    parser.add_argument(
+        "--energy-linear-a",
+        dest="energy_linear_a",
+        type=float,
+        default=None,
+        metavar="A",
+        help="Linear correction slope 'a' (requires also --energy-linear-b)",
+    )
+    parser.add_argument(
+        "--energy-linear-b",
+        dest="energy_linear_b",
+        type=float,
+        default=None,
+        metavar="B",
+        help="Linear correction intercept 'b' (requires also --energy-linear-a)",
+    )
+    parser.add_argument(
+        "--energy-linear-mode",
+        dest="energy_linear_mode",
+        choices=["total_energy", "per_atom"],
+        default=None,
+        metavar="MODE",
+        help="Linear correction mode: total_energy or per_atom (default: total_energy)",
+    )
+
+    # Optional: element-reference energy correction term (computed from the MLIP itself)
+    # Energy correction term based on element reference energies.
+    parser.add_argument(
+        "--correction_elements",
+        dest="correction_elements",
+        default=None,
+        metavar="E1,E2",
+        help="Comma-separated element symbols present in the script (enables reference energy correction)",
+    )
+    parser.add_argument(
+        "--no-energy-correction",
+        dest="no_energy_correction",
+        action="store_true",
+        help="Disable any energy correction (ignores linear correction and --correction_elements)",
+    )
+
     args = parser.parse_args(argv)
     try:
         if args.add:
@@ -111,7 +160,17 @@ def main(argv: List[str] = None) -> int:
             if not args.envs and not args.models:
                 console.print("[red]For --run, provide either --envs or --models.")
                 return 2
-            a = argparse.Namespace(script=args.run, envs=args.envs, models=args.models)
+            a = argparse.Namespace(
+                script=args.run,
+                envs=args.envs,
+                models=args.models,
+                energy_linear_config=args.energy_linear_config,
+                energy_linear_a=args.energy_linear_a,
+                energy_linear_b=args.energy_linear_b,
+                energy_linear_mode=args.energy_linear_mode,
+                correction_elements=args.correction_elements,
+                no_energy_correction=args.no_energy_correction,
+            )
             return cmd_run(a)
         if getattr(args, "available_models", None) is not None:
             a = argparse.Namespace(contains=(args.available_models or None))
