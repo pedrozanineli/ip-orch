@@ -54,7 +54,7 @@ However, the rapid growth of MLIP models - spanning different architectures, tra
 
 `IP-Orch` is a Python package for orchestrating the usage of multiple Machine Learning Interatomic Potentials. With the growth of multiple models, different architectures (e.g., equivariant Graph Neural Networks, message passing, transformers) and datasets (e.g., Materials Project, OC20, custom trajectories) have been used for training. As a result, this scenario led to incompatible environments (PyTorch/JAX/CUDA) and inconsistent APIs, making side‑by‑side evaluation cumbersome and error‑prone. `IP‑Orch` addresses this gap with a thin, ASE‑centric orchestration layer that standardizes execution across models.
 
-By configuring the package in a default environment with its respective interpreter (Venv or Conda), it searches for common keywords of the current MLIPs that have already been released in Matbench Discovery [ref]. `IP-Orch` has already been used for the development of different internal benchmarks, both with API retrieval and local dataset, and can now be used as a lightweight alternative to orchestrate multiple models by different communities interested in working with Machine Learning Interatomic Potentials.
+By configuring the package in a default environment with its respective interpreter (Venv or Conda), it searches for common keywords of the current MLIPs that have already been released in Matbench Discovery `[matbench-paper]`. `IP-Orch` has already been used for the development of different internal benchmarks, both with API retrieval and local dataset, and can now be used as a lightweight alternative to orchestrate multiple models by different communities interested in working with Machine Learning Interatomic Potentials.
 
 # State of the field
 
@@ -65,7 +65,7 @@ IP-Orch focuses on a complementary advantage: orchestrating the same user ASE sc
 
 # Software design
 
-IP-Orch is designed to run the same user-defined ASE script across multiple models and environments in a simple and reproducible way. It follows three principles: (1) orchestrate rather than prescribe workflows; (2) rely on established tools such as the Atomic Simulation Environment (ASE) [@ase-paper]` while remaining environment-agnostic; and (3) minimize overhead by executing directly inside each target environment, without additional servers or communication layers.
+IP-Orch is designed to run the same user-defined ASE script across multiple models and environments in a simple and reproducible way. It follows three principles: (1) orchestrate rather than prescribe workflows; (2) rely on established tools such as the Atomic Simulation Environment (ASE) `[@ase-paper]` while remaining environment-agnostic; and (3) minimize overhead by executing directly inside each target environment, without additional servers or communication layers.
 
 ![IP-Orch architecture.\label{fig:arch}](iporch-architecture.png)
 
