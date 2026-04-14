@@ -8,6 +8,7 @@ version = "0.0.1"
 authors = [
   { name="Mauri Pereira dos Santos Júnior", email="mauri.junior@lnls.br" },
   { name="Pedro Henrique Machado Zanineli", email="pedro.zanineli@lnnano.cnpem.br" },
+  { name="Bruno Focassio", email="bruno.focassio@lnnano.cnpem.br" },
 ]
 description = "Uma biblioteca para MLIPs e benchmarks."
 readme = "README.md"
