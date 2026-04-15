@@ -69,7 +69,7 @@ IP-Orch is designed to run the same user-defined ASE script across multiple mode
 
 ![IP-Orch architecture.\label{fig:arch}](iporch-architecture.png)
 
-This is implemented through a lightweight and modular architecture, as shown in Figure \label{fig:arch}. A central ModelFactory creates ASE calculators from simple aliases, while the CLI handles environment discovery, model selection, and execution. During runtime, IP-Orch iterates over selected (environment, model) pairs and runs the user script inside each environment using conda run, ensuring isolation and avoiding dependency conflicts. By delegating performance to the underlying MLIPs, IP-Orch focuses on providing a transparent and low-friction framework for reproducible benchmarking and comparison across models.
+This is implemented through a lightweight and modular architecture, as shown in Figure \label{fig:arch}. A central `ModelFactory` creates ASE calculators from simple aliases, while the CLI handles environment discovery, model selection, and execution. During runtime, IP-Orch iterates over selected (environment, model) pairs and runs the user script inside each environment using `conda run`, ensuring isolation and avoiding dependency conflicts. By delegating performance to the underlying MLIPs, IP-Orch focuses on providing a transparent and low-friction framework for reproducible benchmarking and comparison across models.
 
 ## Reference energy correction
 
