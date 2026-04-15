@@ -69,7 +69,7 @@ IP-Orch is designed to run the same user-defined ASE script across multiple mode
 
 ![IP-Orch architecture.\label{fig:arch}](iporch-architecture.png)
 
-This is implemented through a lightweight and modular architecture, as shown in Figure \label{fig:arch}. A central ModelFactory creates ASE calculators from simple aliases, while the CLI handles environment discovery, model selection, and execution. During runtime, IP-Orch iterates over selected (environment, model) pairs and runs the user script inside each environment using conda run, ensuring isolation and avoiding dependency conflicts. By delegating performance to the underlying MLIPs, IP-Orch focuses on providing a transparent and low-friction framework for reproducible benchmarking and comparison across models.
+This is implemented through a lightweight and modular architecture, as shown in Figure \label{fig:arch}. A central `ModelFactory` creates ASE calculators from simple aliases, while the CLI handles environment discovery, model selection, and execution. During runtime, IP-Orch iterates over selected (environment, model) pairs and runs the user script inside each environment using `conda run`, ensuring isolation and avoiding dependency conflicts. By delegating performance to the underlying MLIPs, IP-Orch focuses on providing a transparent and low-friction framework for reproducible benchmarking and comparison across models.
 
 ## Reference energy correction
 
@@ -77,14 +77,14 @@ Optionally, one can apply two post-processing corrections to the energy returned
 
 **(1) Linear correction:** if the parameters $a$ and $b$ are provided, the energy is corrected using a linear relation in one of two modes:
 
-- Total energy: $\qquad E' = a\,E_{\mathrm{mlip}} + b$
-- Per atom energy: $\qquad \varepsilon_{\mathrm{mlip}} = \frac{E_{\mathrm{mlip}}}{N},\qquad \varepsilon' = a\,\varepsilon_{\mathrm{mlip}} + b,\qquad E' = N\,\varepsilon'$
+- Total energy: $\qquad E\prime = a\cdot E_{\mathrm{mlip}} + b$
+- Per atom energy: $\qquad \varepsilon_{\mathrm{mlip}} = \frac{E_{\mathrm{mlip}}}{N},\qquad \varepsilon\prime = a\cdot\varepsilon_{\mathrm{mlip}} + b\cdot\qquad E\prime = N\cdot\varepsilon\prime$
 
 Note that, in `per_atom` mode, this expression is equivalent to:
 
-$E' = a\,E_{\mathrm{mlip}} + b\,N.$
+$E\prime = a\cdot E_{\mathrm{mlip}} + b\cdot N.$
 
-If $a$ or $b$ is not provided, no linear correction is applied and $E' = E_{\mathrm{mlip}}$.
+If $a$ or $b$ is not provided, no linear correction is applied and $E\prime = E_{\mathrm{mlip}}$.
 
 **(2) Element-wise reference energy correction**
 
@@ -93,7 +93,7 @@ If a list of elements $\{\alpha\}$ is provided (via `--correction_elements`), or
 For a given structure, the reference energy shift ($\Delta E_{\mathrm{ref}}$) and the final corrected energy ($E_{\mathrm{corr}}$) are defined as:
 
 $$
-\Delta E_{\mathrm{ref}} = \sum_{\alpha} n_\alpha\,E_{\mathrm{ref}}(\alpha) \xrightarrow{} E_{\mathrm{corr}} = E' - \Delta E_{\mathrm{ref}}.
+\Delta E_{\mathrm{ref}} = \sum_{\alpha} n_\alpha\cdot E_{\mathrm{ref}}(\alpha) \xrightarrow{} E_{\mathrm{corr}} = E\prime - \Delta E_{\mathrm{ref}}.
 $$
 
 
