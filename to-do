@@ -1,2 +1,3 @@
 [ ] pretrained models folder - add path in config for models which need to be downloaded locally + get path to pass automatically to the model_factory file
+[ ] python package publication - setup github actions for deploy
 

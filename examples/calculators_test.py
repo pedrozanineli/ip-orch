@@ -16,6 +16,3 @@ def main(calculator_name, ase_calculator):
     except Exception as exc:
         print("[error] calculator imported, but failed to compute energy on H atom.")
         return
-
-if __name__ == "__main__":
-    print("This script is intended to be run via: ip-orch --run examples/calculators_test.py")

@@ -44,7 +44,7 @@ bibliography: references.bib
 
 # Summary
 
-Density Functional Theory (DFT) is a fundamental tool of computational materials science, providing quantum-mechanical accuracy for predicting structural, electronic, and thermodynamic properties at the atomic scale. However, its computational cost—scaling with the number of electrons—limits its applicability to relatively small systems and short timescales, restricting its use in simulations of complex materials, interfaces, and dynamical processes.
+Density Functional Theory (DFT) is a fundamental tool of computational materials science, providing quantum-mechanical accuracy for predicting structural, electronic, and thermodynamic properties at the atomic scale. However, its computational cost-scaling with the number of electrons-limits its applicability to relatively small systems and short timescales, restricting its use in simulations of complex materials, interfaces, and dynamical processes.
 
 Machine Learning Interatomic Potentials (MLIPs) have emerged as a powerful alternative, enabling near ab initio accuracy at a fraction of the computational cost by learning the potential energy surface from DFT reference data `[@kozinsky_2022]`. By scaling with the number of atoms rather than electrons, MLIPs allow simulations of larger systems, longer timescales, and more diverse structural environments `[@focassio_2024]`. This has expanded the scope of atomistic modeling to problems such as phase transformations, defect dynamics, and biomolecule–material interactions.
 
@@ -70,6 +70,32 @@ IP-Orch is designed to run the same user-defined ASE script across multiple mode
 ![IP-Orch architecture.\label{fig:arch}](iporch-architecture.png)
 
 This is implemented through a lightweight and modular architecture, as shown in Figure \label{fig:arch}. A central ModelFactory creates ASE calculators from simple aliases, while the CLI handles environment discovery, model selection, and execution. During runtime, IP-Orch iterates over selected (environment, model) pairs and runs the user script inside each environment using conda run, ensuring isolation and avoiding dependency conflicts. By delegating performance to the underlying MLIPs, IP-Orch focuses on providing a transparent and low-friction framework for reproducible benchmarking and comparison across models.
+
+## Reference energy correction
+
+Optionally, one can apply two post-processing corrections to the energy returned by the MLIP used. Let $E_{\mathrm{mlip}}$ be the energy predicted by the model for a structure with $N$ atoms and composition ${n_\alpha}$ (number of atoms of element $\alpha$).
+
+**(1) Linear correction:** if the parameters $a$ and $b$ are provided, the energy is corrected using a linear relation in one of two modes:
+
+- Total energy: $\qquad E' = a\,E_{\mathrm{mlip}} + b$
+- Per atom energy: $\qquad \varepsilon_{\mathrm{mlip}} = \frac{E_{\mathrm{mlip}}}{N},\qquad \varepsilon' = a\,\varepsilon_{\mathrm{mlip}} + b,\qquad E' = N\,\varepsilon'$
+
+Note that, in `per_atom` mode, this expression is equivalent to:
+
+$E' = a\,E_{\mathrm{mlip}} + b\,N.$
+
+If $a$ or $b$ is not provided, no linear correction is applied and $E' = E_{\mathrm{mlip}}$.
+
+**(2) Element-wise reference energy correction**
+
+If a list of elements $\{\alpha\}$ is provided (via `--correction_elements`), or if a dictionary of energies is explicitly given, a reference energy is computed for each element using the MLIP itself: $E_{\mathrm{ref}}(\alpha) \equiv E_{\mathrm{mlip}}(\text{isolated atom of }\alpha)$, where the isolated atom is evaluated in a large non-periodic box.
+
+For a given structure, the reference energy shift ($\Delta E_{\mathrm{ref}}$) and the final corrected energy ($E_{\mathrm{corr}}$) are defined as:
+
+$$
+\Delta E_{\mathrm{ref}} = \sum_{\alpha} n_\alpha\,E_{\mathrm{ref}}(\alpha) \xrightarrow{} E_{\mathrm{corr}} = E' - \Delta E_{\mathrm{ref}}.
+$$
+
 
 <!-- # Research impact statement
 
