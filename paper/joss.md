@@ -20,7 +20,7 @@ authors:
   
   - name: Bruno Focassio
     orcid: 0000-0003-4811-7729
-    affiliation: 2
+    affiliation: "1"
 
   - name: Gabriel R. Schleder
     orcid: 0000-0003-3129-8682
