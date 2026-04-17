@@ -77,7 +77,7 @@ Available and configured models can be checked using the following:
 
 ```bash
 # List known model aliases
-ip-orch --available-models
+ip-orch --supported-models
 ```
 
 ### Run a script across models

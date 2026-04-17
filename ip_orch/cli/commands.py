@@ -13,6 +13,7 @@ from rich.table import Table
 from rich.rule import Rule
 from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
+from rich.text import Text
 from rich import box
 
 from ..config.config_store import (
@@ -67,19 +68,23 @@ def cmd_models(args: argparse.Namespace) -> int:
     pairs = _dedup_pairs(cfg.get("full_models", []))
     configured_aliases = { _canonical_alias(m) for _e, m in pairs }
 
-    rows = sorted((alias, target) for alias, target in aliases.items())
+    rows = [(alias, target) for alias, target in aliases.items()]
 
     if args.contains:
         sub = args.contains.lower()
         rows = [r for r in rows if sub in r[0].lower() or sub in (r[1] or "").lower() or sub in repo_url_for_alias(r[0]).lower()]
+
+    # Show configured aliases first, then the rest; keep alphabetical within groups.
+    rows = sorted(rows, key=lambda r: (0 if r[0] in configured_aliases else 1, r[0]))
+
     table = Table(box=box.SIMPLE_HEAVY, header_style="bold cyan")
     table.add_column("alias", style="cyan")
     table.add_column("registry", style="magenta")
     table.add_column("repo", style="blue")
-    table.add_column("configured", style="green")
+    table.add_column("configured")
     for alias, target in rows:
         url = repo_url_for_alias(alias)
-        configured_mark = "✓" if alias in configured_aliases else "×"
+        configured_mark = Text("✓", style="green") if alias in configured_aliases else Text("×", style="red")
         table.add_row(alias, target, url, configured_mark)
     console.print(table)
     return 0
@@ -377,7 +382,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                 except Exception:
                     pass
             else:
-                console.print(f"[green]Success: {env_name}")
+                console.print(f"[green]Success: {model_name}")
                 try:
                     set_model_status(alias_key, "ok")
                 except Exception:

@@ -1,4 +1,5 @@
 import argparse
+import sys
 from typing import List
 
 from rich.console import Console
@@ -20,7 +21,7 @@ def main(argv: List[str] = None) -> int:
         "  ip-orch --remove mace mace_mp\n"
         "  ip-orch --run script.py --envs mace,orb\n"
         "  ip-orch --run script.py --models mace-mp,orb-v3\n"
-        "  ip-orch --available-models mace\n"
+        "  ip-orch --supported-models mace\n"
     )
     parser = argparse.ArgumentParser(
         prog="ip-orch",
@@ -30,7 +31,7 @@ def main(argv: List[str] = None) -> int:
         usage=(
             "ip-orch [-h]\n"
             "               (--add ENV MODEL | --remove ENV [MODEL ...] | --run SCRIPT |\n"
-            "                --available-models [SUBSTR] | --configure)\n"
+            "                --supported-models [SUBSTR] | --configure)\n"
             "               [--models-path PATH]\n"
             "               [--envs ENV1,ENV2 | --models ALIAS1,ALIAS2]"
         ),
@@ -51,12 +52,13 @@ def main(argv: List[str] = None) -> int:
         help="Run an ASE script across selected models (requires one of --envs or --models)",
     )
     grp.add_argument(
+        "--supported-models",
         "--available-models",
         nargs="?",
-        dest="available_models",
+        dest="supported_models",
         const="",
         metavar="SUBSTR",
-        help="List available model aliases (optionally filter by name)",
+        help="List supported model aliases (optionally filter by name)",
     )
     grp.add_argument("--configure", action="store_true", help="Interactive environment discovery and setup")
 
@@ -131,6 +133,10 @@ def main(argv: List[str] = None) -> int:
         help="Disable any energy correction (ignores linear correction and --correction_elements)",
     )
 
+    raw_argv = argv if argv is not None else sys.argv[1:]
+    if "--available-models" in raw_argv:
+        console.print("[yellow]--available-models is deprecated; use --supported-models.[/yellow]")
+
     args = parser.parse_args(argv)
     try:
         if args.add:
@@ -172,8 +178,8 @@ def main(argv: List[str] = None) -> int:
                 no_energy_correction=args.no_energy_correction,
             )
             return cmd_run(a)
-        if getattr(args, "available_models", None) is not None:
-            a = argparse.Namespace(contains=(args.available_models or None))
+        if getattr(args, "supported_models", None) is not None:
+            a = argparse.Namespace(contains=(args.supported_models or None))
             return cmd_models(a)
         if args.configure:
             return cmd_configure(argparse.Namespace())
